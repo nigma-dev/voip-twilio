@@ -11,6 +11,7 @@
           <set>
             <option value="/mnt/projects/VoipTwilioPOC" />
             <option value="/mnt/projects/VoipTwilioPOC/app" />
+            <option value="/mnt/projects/VoipTwilioPOC/module-twilio" />
           </set>
         </option>
         <option name="resolveModulePerSourceSet" value="false" />
