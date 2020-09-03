@@ -6,13 +6,51 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
-    <TextView
+    <Button
+        android:id="@+id/buttonJoin"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Hello World!"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
+        android:text="JOIN"
+        app:layout_constraintBottom_toBottomOf="@+id/editTextRoomId"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/editTextRoomId"
+        app:layout_constraintTop_toTopOf="@+id/editTextRoomId" />
+
+    <Button
+        android:id="@+id/buttonEnd"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="END"
+        app:layout_constraintBottom_toBottomOf="@+id/editTextUserName"
+        app:layout_constraintEnd_toEndOf="@+id/buttonJoin"
+        app:layout_constraintStart_toStartOf="@+id/buttonJoin"
+        app:layout_constraintTop_toTopOf="@+id/editTextUserName" />
+
+    <EditText
+        android:id="@+id/editTextRoomId"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="12dp"
+        android:ems="10"
+        android:inputType="textPersonName"
+        android:text="room id "
+        app:layout_constraintEnd_toStartOf="@+id/buttonJoin"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <EditText
+        android:id="@+id/editTextUserName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="28dp"
+        android:ems="10"
+        android:inputType="textPersonName"
+        android:text="username"
+        app:layout_constraintEnd_toEndOf="@+id/editTextRoomId"
+        app:layout_constraintStart_toStartOf="@+id/editTextRoomId"
+        app:layout_constraintTop_toBottomOf="@+id/editTextRoomId" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
