@@ -35,6 +35,7 @@ class MainActivity : AppCompatActivity(), Callback {
         buttonEnd.setOnClickListener {
             with(service) {
                 action = VoipService.ACTION_VOIP_DISCONNECT_ROOM
+                putExtra(VoipService.KEY_ROOM_NAME, editTextRoomId.text.toString())
                 startService(this)
             }
         }
@@ -67,7 +68,8 @@ class MainActivity : AppCompatActivity(), Callback {
                 val token = jsonObject.getString("token")
                 with(service) {
                     action = VoipService.ACTION_VOIP_CONNECT_ROOM
-                    putExtra("token", token)
+                    putExtra(VoipService.KEY_ROOM_NAME, editTextRoomId.text.toString())
+                    putExtra(VoipService.KEY_ACCESS_TOKEN, token)
                     startService(this)
                 }
             }
