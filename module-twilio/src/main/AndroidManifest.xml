@@ -17,16 +17,21 @@
 
         <activity
             android:name=".ui.VoipActivity"
-            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:alwaysRetainTaskState="true"
+            android:clearTaskOnLaunch="true"
+            android:excludeFromRecents="true"
             android:label="@string/title_activity_voip"
-            android:theme="@style/VoipActivityTheme">
+            android:launchMode="singleTask"
+            android:screenOrientation="portrait"
+            android:showOnLockScreen="true"
+            android:theme="@style/Theme.AppCompat.NoActionBar">
 
         </activity>
 
         <service
             android:name=".service.VoipService"
             android:enabled="true"
-            android:exported="true" />
+            android:exported="false" />
     </application>
 
 </manifest>

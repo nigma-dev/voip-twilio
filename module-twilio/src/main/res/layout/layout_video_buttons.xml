@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:parentTag="androidx.constraintlayout.widget.ConstraintLayout"
+    tools:theme="@style/Theme.AppCompat.NoActionBar">
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fab_call_end"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="24dp"
+        android:src="@drawable/ic_end_call"
+        app:backgroundTint="#f21919"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/fab_mic_handle" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fab_mic_handle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_mic"
+        app:backgroundTint="@color/color_green"
+        app:layout_constraintBottom_toBottomOf="@+id/fab_call_end"
+        app:layout_constraintEnd_toStartOf="@+id/fab_call_end"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/fab_audio_output"
+        app:layout_constraintTop_toTopOf="@+id/fab_call_end"
+        tools:ignore="RelativeOverlap" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fab_camera_handle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_video_black"
+        app:backgroundTint="@color/color_green"
+        app:layout_constraintBottom_toBottomOf="@+id/fab_audio_output"
+        app:layout_constraintEnd_toStartOf="@+id/fab_audio_output"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/fab_audio_output" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fab_audio_output"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="@+id/fab_mic_handle"
+        app:layout_constraintEnd_toStartOf="@+id/fab_mic_handle"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toEndOf="@+id/fab_camera_handle"
+        app:layout_constraintTop_toTopOf="@+id/fab_mic_handle"
+        tools:backgroundTint="@color/color_green"
+        tools:src="@drawable/ic_speaker" />
+
+    <!--<androidx.constraintlayout.widget.Group
+        android:id="@+id/group_local"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:constraint_referenced_ids="@+id/iv_btn_flip_cam,@+id/vv_secondary" />-->
+</merge>

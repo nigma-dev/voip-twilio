@@ -1,5 +1,31 @@
 <resources>
 
-    <color name="black_overlay">#66000000</color>
+    <color name="colorAccent">#7AC062</color>
+
+    <color name="color_tree_poppy">#F79814</color>
+    <color name="color_green">#7ac062</color>
+    <color name="color_white_green">#9ED07E</color>
+    <color name="color_button_gray">#616161</color>
+    <color name="color_red">@android:color/holo_red_dark</color>
+    <color name="color_grey">#808080</color>
+    <color name="color_storm_dust">#656565</color>
+    <color name="selector_gray">#BDBDBD</color>
+    <color name="speciality_bg">#F2F2F2</color>
+    <color name="black">#D3000000</color>
+
+    <color name="color_blue">#0D65D1</color>
+    <color name="light_blue">#0084FF</color>
+    <color name="pending_color">#04AC9B</color>
+
+
+    <!--region other color-->
+    <color name="color_solitude">#EFF3F6</color>
+    <!--endregion-->
+
+    <!--Define Color -->
+    <color name="color_text_gery">#828282</color>
+    <color name="general_text_color">#484848</color>
+
+    <color name="divider_color">#E6E5F2</color>
 
 </resources>

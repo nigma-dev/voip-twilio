@@ -2,10 +2,11 @@ package com.nigma.module_twilio.service
 
 import com.nigma.module_twilio.usecase.TwilioUseCase
 import com.twilio.video.Room
+import timber.log.Timber
 import kotlin.jvm.Throws
 
 class TwilioService(
-    private val useCase: TwilioUseCase,
+    val useCase: TwilioUseCase,
     private val listener: Room.Listener
 ) {
 
@@ -17,24 +18,24 @@ class TwilioService(
     }
 
     @Throws(IllegalArgumentException::class)
-    fun disconnectRoom(roomName: String?) {
-        roomName ?: throw IllegalArgumentException("roomName was null")
-        useCase.disconnectFromRoom(roomName)
+    fun disconnectRoom() {
+        useCase.disconnectFromRoom()
     }
 
 
-    fun publishLocalTrack(isVideoCall : Boolean) {
+    fun publishLocalTrack(isVideoCall: Boolean) {
         useCase.publishLocalTrack(isVideoCall)
     }
 
 
     fun handleMicrophone() {
-
+        Timber.i("handleMicrophone ${useCase.localAudioTrack.isEnabled}")
+        useCase.localAudioTrack.enable(!useCase.localAudioTrack.isEnabled)
     }
 
 
     fun handleCameraFlip() {
-
+        useCase.switchCamera()
     }
 
 
@@ -43,6 +44,10 @@ class TwilioService(
     }
 
     fun handleCameraOnOff() {
-
+        if (useCase.localVideoTrack.isEnabled) {
+            useCase.disableVideoLocalTrack()
+        } else {
+            useCase.enableVideoLocalTrack()
+        }
     }
 }

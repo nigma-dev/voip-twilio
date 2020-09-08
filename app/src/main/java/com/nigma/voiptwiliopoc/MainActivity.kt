@@ -1,11 +1,13 @@
 package com.nigma.voiptwiliopoc
 
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.nigma.module_twilio.model.User
 import com.nigma.module_twilio.service.VoipService
 import kotlinx.android.synthetic.main.activity_main.*
 import okhttp3.*
@@ -14,6 +16,7 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONObject
 import timber.log.Timber
 import java.io.IOException
+import java.io.Serializable
 
 
 class MainActivity : AppCompatActivity(), Callback {
@@ -23,6 +26,7 @@ class MainActivity : AppCompatActivity(), Callback {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        editTextUserName.setText(getDeviceName() ?: "user")
         buttonJoin.setOnClickListener {
             val identity = editTextUserName.text.toString()
             getAccessToken(
@@ -43,7 +47,7 @@ class MainActivity : AppCompatActivity(), Callback {
 
     private val JSON: MediaType = "application/json; charset=utf-8".toMediaType()
 
-    fun getAccessToken(jsonObject: JSONObject) {
+    private fun getAccessToken(jsonObject: JSONObject) {
         val body: RequestBody = jsonObject.toString().toRequestBody(JSON)
         val request: Request = Request.Builder()
             .url("http://twilio-env.eba-mjb4e2p2.ap-southeast-1.elasticbeanstalk.com/token")
@@ -66,10 +70,14 @@ class MainActivity : AppCompatActivity(), Callback {
             ?.let {
                 val jsonObject = JSONObject(it.string())
                 val token = jsonObject.getString("token")
+                val user = User(editTextUserName.text.toString(), "https://d.newsweek.com/en/full/1502638/tifa-ff7-remake-e3-2019.webp")
+                Timber.i("user -> $user")
                 with(service) {
                     action = VoipService.ACTION_VOIP_CONNECT_ROOM
                     putExtra(VoipService.KEY_ROOM_NAME, editTextRoomId.text.toString())
                     putExtra(VoipService.KEY_ACCESS_TOKEN, token)
+                    putExtra(VoipService.KEY_IS_VOIP_VIDEO_TYPE, switch1.isChecked)
+                    putExtra(VoipService.KEY_USER_OBJECT, user)
                     startService(this)
                 }
             }
@@ -77,5 +85,26 @@ class MainActivity : AppCompatActivity(), Callback {
 
     private fun toast(any: Any) {
         Toast.makeText(this, any.toString(), Toast.LENGTH_SHORT).show()
+    }
+
+    private fun getDeviceName(): String? {
+        val manufacturer = Build.MANUFACTURER
+        val model = Build.MODEL
+        return if (model.startsWith(manufacturer)) {
+            capitalize(model)
+        } else {
+            capitalize(manufacturer) + " " + model
+        }
+    }
+
+
+    private fun capitalize(s: String?): String {
+        if (s.isNullOrEmpty()) return ""
+        val first = s[0]
+        return if (Character.isUpperCase(first)) {
+            s
+        } else {
+            Character.toUpperCase(first).toString() + s.substring(1)
+        }
     }
 }

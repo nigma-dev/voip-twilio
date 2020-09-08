@@ -6,7 +6,7 @@ interface ITwilioUseCase {
 
     fun connectToRoom(roomIdName: String, accessToken: String, roomListener: Room.Listener)
 
-    fun disconnectFromRoom(roomIdName: String)
+    fun disconnectFromRoom()
 
     fun enableMicrophone()
 
@@ -16,9 +16,7 @@ interface ITwilioUseCase {
 
     fun disableVideoLocalTrack()
 
-    fun turnFrontCamera()
-
-    fun turnBackCamera()
+    fun switchCamera()
 
     fun publishLocalTrack(isVideoCall: Boolean)
 

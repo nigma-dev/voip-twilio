@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center_horizontal"
+    android:orientation="vertical">
+
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:id="@+id/imgv_image"
+        android:layout_width="@dimen/dimen_user_profile_size"
+        android:layout_height="@dimen/dimen_user_profile_size"
+        android:layout_marginTop="16dp"
+        android:src="@drawable/ic_doctor"
+        app:civ_circle_background_color="@color/selector_gray" />
+
+    <TextView
+        android:id="@+id/tv_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:background="@color/color_green"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
+        android:text="Dr Shwe Zin Win "
+        android:textColor="@android:color/white"
+        android:textSize="16sp"
+        android:textStyle="bold" />
+
+
+    <TextView
+        android:id="@+id/tv_status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="calling ..."
+        android:textColor="@color/color_green"
+        android:textStyle="bold" />
+
+</LinearLayout>

@@ -1,45 +1,49 @@
 package com.nigma.module_twilio.ui
 
-import android.content.ComponentName
-import android.content.Context
-import android.content.Intent
-import android.content.ServiceConnection
 import android.os.Bundle
-import android.os.IBinder
-import androidx.appcompat.app.AppCompatActivity
+import android.os.Handler
+import android.os.Looper
+import androidx.lifecycle.MutableLiveData
+import com.nigma.module_twilio.base.CallStyleActionActivity
+import com.nigma.module_twilio.model.User
 import com.nigma.module_twilio.service.VoipService
+import com.nigma.module_twilio.service.VoipService.Companion.KEY_USER_OBJECT
+import com.nigma.module_twilio.utils.pushFragment
+import com.nigma.module_twilio.utils.removeFragmentStacks
 import timber.log.Timber
 
-class VoipActivity : AppCompatActivity(), ServiceConnection {
+class VoipActivity : CallStyleActionActivity() {
 
-    private val service by lazy { Intent(applicationContext, VoipService::class.java) }
-
-    private var isBind = false
+    val userLiveData = MutableLiveData<User>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        if (!isBind) bindService(service, this, Context.BIND_AUTO_CREATE)
+        try {
+            val user = intent.getSerializableExtra(KEY_USER_OBJECT) as User
+            userLiveData.value = user
+        } catch (e: Exception) {
+            Timber.e(e)
+        }
+
     }
 
-    override fun onDestroy() {
-        unbindService(this)
-        super.onDestroy()
+    override fun onServiceBounced(binder: VoipService.ServiceBinder) {
+        val fragment =
+            if (binder.isVideoCall) VideoVoipFragment(binder) else AudioVoipFragment(binder)
+        binder.listener = fragment.participantListener
+        pushFragment(fragment)
     }
 
-    override fun onServiceConnected(p0: ComponentName?, p1: IBinder?) {
-        p1 ?: return
-        val binder = p1 as VoipService.ServiceBinder
-        binder
-            .getMediaStateLiveData()
-            .observe(this, {
-
-            })
-        isBind = true
-        Timber.i("onServiceConnected | component name $p0 | binder ${p1?.pingBinder()}")
+    fun clickHungUp() {
+        Handler(Looper.getMainLooper())
+            .postDelayed(
+                {
+                    removeFragmentStacks()
+                    finishAndRemoveTask()
+                }, 200
+            )
+        Timber.i("clickHungUp")
     }
 
-    override fun onServiceDisconnected(p0: ComponentName?) {
-        isBind = false
-        Timber.i("onServiceDisconnected | component name $p0 ")
-    }
 }
+

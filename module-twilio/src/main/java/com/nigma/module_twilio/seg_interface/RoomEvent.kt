@@ -1,4 +1,4 @@
-package com.nigma.module_twilio.segregated_interface
+package com.nigma.module_twilio.seg_interface
 
 import com.twilio.video.Room
 
