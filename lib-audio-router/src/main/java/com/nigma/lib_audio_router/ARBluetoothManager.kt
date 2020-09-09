@@ -1,4 +1,4 @@
-package com.nigma.lib_audio_router.new
+package com.nigma.lib_audio_router
 
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothHeadset
@@ -13,15 +13,15 @@ import timber.log.Timber
 
 class ARBluetoothManager(
     private val adapter: BluetoothAdapter,
-    val callback: () -> Unit
+    val callback: (connected: Boolean) -> Unit
 ) {
 
-    var hasBluetoothHeadset = false
+    private var hasBluetoothHeadset = false
         @Synchronized
         get
         @Synchronized
-        private set(value) {
-            callback()
+        set(value) {
+            callback(value)
             field = value
         }
 
@@ -30,11 +30,13 @@ class ARBluetoothManager(
 
 
     fun start(context: Context) {
+        Timber.d("start")
         register(context)
     }
 
 
     fun stop(context: Context) {
+        Timber.d("stop")
         unregister(context)
     }
 
@@ -45,6 +47,7 @@ class ARBluetoothManager(
      */
     @Suppress("DEPRECATION")
     fun isBluetoothConnected(am: AudioManager): Boolean {
+        Timber.d("isBluetoothConnected")
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
             for (device in am.getDevices(AudioManager.GET_DEVICES_OUTPUTS)) {
                 return device.type == AudioDeviceInfo.TYPE_BLUETOOTH_SCO || device.type == AudioDeviceInfo.TYPE_BLUETOOTH_SCO
@@ -57,6 +60,7 @@ class ARBluetoothManager(
 
 
     private fun isBluetoothHeadsetConnected(): Boolean {
+        Timber.d("isBluetoothHeadsetConnected")
         val mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter() ?: return false
         return mBluetoothAdapter.isEnabled && mBluetoothAdapter
             .getProfileConnectionState(BluetoothHeadset.HEADSET) == BluetoothHeadset.STATE_CONNECTED
@@ -64,6 +68,7 @@ class ARBluetoothManager(
 
 
     private fun register(context: Context) {
+        Timber.d("register")
         context
             .registerReceiver(
                 receiver,
@@ -80,6 +85,7 @@ class ARBluetoothManager(
 
 
     private fun unregister(context: Context) {
+        Timber.d("unregister")
         context.unregisterReceiver(receiver)
     }
 

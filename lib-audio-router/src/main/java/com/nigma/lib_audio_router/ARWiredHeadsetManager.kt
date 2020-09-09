@@ -1,4 +1,4 @@
-package com.nigma.lib_audio_router.new
+package com.nigma.lib_audio_router
 
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -6,20 +6,21 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.media.AudioDeviceInfo
 import android.media.AudioManager
+import timber.log.Timber
 
 class ARWiredHeadsetManager(
     private val am: AudioManager,
-    val callback: () -> Unit
+    val callback: (plugged: Boolean) -> Unit
 ) {
 
-    var hasBluetoothHeadset = false
+    private var hasWiredHeadset = false
         @Synchronized
         get() {
             return isAudioJackConnected()
         }
         @Synchronized
-        private set(value) {
-            callback()
+        set(value) {
+            callback(value)
             field = value
         }
 
@@ -27,6 +28,7 @@ class ARWiredHeadsetManager(
 
 
     fun start(context: Context) {
+        Timber.d("start")
         context
             .registerReceiver(
                 receiver,
@@ -37,6 +39,7 @@ class ARWiredHeadsetManager(
     }
 
     fun stop(context: Context) {
+        Timber.d("stop")
         context
             .unregisterReceiver(
                 receiver
@@ -51,9 +54,12 @@ class ARWiredHeadsetManager(
      */
     @Suppress("DEPRECATION")
     fun isAudioJackConnected(): Boolean {
+        Timber.d("isAudioJackConnected")
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
             for (device in am.getDevices(AudioManager.GET_DEVICES_OUTPUTS)) {
-                return device.type == AudioDeviceInfo.TYPE_WIRED_HEADSET || device.type == AudioDeviceInfo.TYPE_WIRED_HEADPHONES
+                if (device.type == AudioDeviceInfo.TYPE_WIRED_HEADSET || device.type == AudioDeviceInfo.TYPE_WIRED_HEADPHONES) {
+                    return true
+                }
             }
             return false
         } else {
@@ -64,7 +70,8 @@ class ARWiredHeadsetManager(
 
     inner class AudioJackReceiver : BroadcastReceiver() {
         override fun onReceive(p0: Context?, p1: Intent?) {
-            hasBluetoothHeadset = isAudioJackConnected()
+            hasWiredHeadset = isAudioJackConnected()
+            Timber.d("onReceive %s", hasWiredHeadset)
         }
     }
 }
