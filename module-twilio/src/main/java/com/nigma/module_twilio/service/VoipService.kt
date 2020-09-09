@@ -2,33 +2,34 @@ package com.nigma.module_twilio.service
 
 import android.app.Service
 import android.content.Intent
-import android.media.AudioRouting
 import android.os.Binder
 import android.os.IBinder
 import androidx.lifecycle.MutableLiveData
-import com.nigma.lib_audio_router.AppRTCAudioManager
-import com.nigma.lib_audio_router.AppRTCAudioManager.AudioDevice
+import com.nigma.lib_audio_router.callback.AudioRoutingChangesListener
 import com.nigma.lib_audio_router.AudioRoutingManager
 import com.nigma.module_twilio.R
-import com.nigma.module_twilio.model.AudioDeviceModel
 import com.nigma.module_twilio.callbacks.AudioRoutingCallback
 import com.nigma.module_twilio.callbacks.RemoteParticipantEvent
 import com.nigma.module_twilio.callbacks.RoomEvent
 import com.nigma.module_twilio.callbacks.WrappedParticipantEvent
+import com.nigma.module_twilio.model.AudioDeviceModel
 import com.nigma.module_twilio.ui.VoipActivity
 import com.nigma.module_twilio.usecase.TwilioUseCase
 import com.nigma.module_twilio.utils.VoipMediaState
+import com.nigma.module_twilio.utils.toast
 import com.twilio.video.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import timber.log.Timber
 
-class VoipService : Service(), RoomEvent, RemoteParticipantEvent,
-    AppRTCAudioManager.AudioManagerEvents, AppRTCAudioManager.OnWiredHeadsetStateListener {
+class VoipService : Service(), RoomEvent, RemoteParticipantEvent, AudioRoutingChangesListener {
 
     private val voipMediaState by lazy { VoipMediaState() }
 
-    private val audioRouter by lazy { AppRTCAudioManager.create(applicationContext) }
+    private val audioRoutingManager by lazy {
+        AudioRoutingManager.getInstance(
+            applicationContext,
+            this
+        )
+    }
 
     private val mediaState = MutableLiveData<VoipMediaState>()
 
@@ -53,23 +54,11 @@ class VoipService : Service(), RoomEvent, RemoteParticipantEvent,
     override fun onCreate() {
         super.onCreate()
         Timber.i("onCreate")
-        with(audioRouter) {
-            /*setDefaultAudioDevice(
-                AudioRoutingManager().getSystemCurrentRoutedAudioDevice(
-                    audioRouter.androidAudioManager
-                )
-            )*/
-            setManageBluetoothByDefault(true)
-            setManageHeadsetByDefault(true)
-            setManageSpeakerPhoneByProximity(false)
-            setOnWiredHeadsetStateListener(this@VoipService)
-            start(this@VoipService)
-        }
     }
 
     override fun onDestroy() {
         Timber.i("onDestroy")
-        audioRouter.stop()
+        /*audioRouter.stop()*/
         super.onDestroy()
     }
 
@@ -99,7 +88,6 @@ class VoipService : Service(), RoomEvent, RemoteParticipantEvent,
                     }
                     ACTION_VOIP_DISCONNECT_ROOM -> {
                         disconnectRoom()
-                        stopSelf()
                     }
 
                     ACTION_VOIP_HANDLE_MIC -> handleMicrophone()
@@ -107,8 +95,8 @@ class VoipService : Service(), RoomEvent, RemoteParticipantEvent,
                     ACTION_VOIP_HANDLE_AUDIO_OUTPUT -> handleAudioRouting()
 
                     ACTION_VOIP_HANDLE_CHANGE_AUDIO_DEVICE -> {
-                        val device = intent.getSerializableExtra("audio-device") as AudioDevice
-                        audioRouter.selectAudioDevice(device)
+//                        val device = intent.getSerializableExtra("audio-device") as AudioDevice
+//                        audioRouter.selectAudioDevice(device)
                     }
 
                     ACTION_VOIP_HANDLE_CAMERA -> handleCameraOnOff()
@@ -123,7 +111,8 @@ class VoipService : Service(), RoomEvent, RemoteParticipantEvent,
     }
 
     private fun handleAudioRouting() {
-        val devices = audioRouter.getAudioDevices()
+        audioRoutingManager.selectDevice(com.nigma.lib_audio_router.model.AudioDevice.EARPIECE)
+        /*val devices = audioRouter.getAudioDevices()
         val selectedDevice = audioRouter.getSelectedAudioDevice() ?: return
         if (devices.size <= 2) {
             val device = if (selectedDevice.name == AudioDevice.SPEAKER_PHONE.name) {
@@ -134,11 +123,11 @@ class VoipService : Service(), RoomEvent, RemoteParticipantEvent,
             audioRouter.selectAudioDevice(device)
         } else {
             mapAudioDevices(devices)
-        }
+        }*/
     }
 
-    private fun mapAudioDevices(availableDevices: Set<AudioDevice?>) {
-        val devices = mutableListOf<AudioDeviceModel>()
+    private fun mapAudioDevices(availableDevices: Set<Any?>) {
+        /*val devices = mutableListOf<AudioDeviceModel>()
         for (device in availableDevices) {
             device ?: continue
             val model = when (device) {
@@ -175,12 +164,13 @@ class VoipService : Service(), RoomEvent, RemoteParticipantEvent,
         }
         serviceBinder
             .audioRoutingCallback
-            ?.onAudioDevicesListAvailable(devices)
+            ?.onAudioDevicesListAvailable(devices)*/
     }
 
     /*region Voip Room Related Callback*/
     override fun onConnected(room: Room) {
         Timber.i("onConnected ${room.sid}")
+        audioRoutingManager.start()
         twilioService.publishLocalTrack(true)
         if (room.remoteParticipants.isNotEmpty()) {
             room.remoteParticipants[0].setListener(this)
@@ -196,10 +186,12 @@ class VoipService : Service(), RoomEvent, RemoteParticipantEvent,
     }
 
     override fun onReconnected(room: Room) {
+        stopSelf()
         Timber.i("onReconnected ${room.sid} ")
     }
 
     override fun onDisconnected(room: Room, twilioException: TwilioException?) {
+        audioRoutingManager.release()
         Timber.i(twilioException, "onDisconnected ${room.sid} ")
     }
 
@@ -254,16 +246,16 @@ class VoipService : Service(), RoomEvent, RemoteParticipantEvent,
     }
 
     /*endregion*/
-
+/*
     override fun onAudioDeviceChanged(
         var1: AudioDevice,
         var2: Set<AudioDevice?>
     ) {
         Timber.i("onAudioDeviceChanged ${var1.name}")
         mapAudioDeviceToUi(var1, var2)
-    }
+    }*/
 
-    private fun mapAudioDeviceToUi(
+    /*private fun mapAudioDeviceToUi(
         currentDevice: AudioDevice,
         deviceList: Set<AudioDevice?>
     ) {
@@ -287,7 +279,7 @@ class VoipService : Service(), RoomEvent, RemoteParticipantEvent,
             ?.onAudioOutputDeviceChange(icon, currentDevice == AudioDevice.EARPIECE)
 
         Timber.i("mapAudioDeviceToUi ${icon}")
-    }
+    }*/
 
     inner class ServiceBinder : Binder() {
 
@@ -339,7 +331,11 @@ class VoipService : Service(), RoomEvent, RemoteParticipantEvent,
         const val KEY_USER_OBJECT = "key:_USER_OBJECT"
     }
 
-    override fun onWiredHeadsetStateChanged(var1: Boolean, var2: Boolean) {
-        Timber.i("onWiredHeadsetStateChanged $var1 | $var2")
+
+    override fun onAudioRoutedDeviceChanged(
+        audioDevice: com.nigma.lib_audio_router.model.AudioDevice,
+        availableDevice: List<com.nigma.lib_audio_router.model.AudioDevice>
+    ) {
+        toast("Device : ${audioDevice.deviceName}")
     }
 }
