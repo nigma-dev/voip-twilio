@@ -28,9 +28,8 @@ class VoipActivity : CallStyleActionActivity() {
     }
 
     override fun onServiceBounced(binder: VoipService.ServiceBinder) {
-        val fragment =
-            if (binder.isVideoCall) VideoVoipFragment(binder) else AudioVoipFragment(binder)
-        binder.listener = fragment.participantListener
+        val fragment = if (binder.isVideoCall) VideoVoipFragment(binder) else AudioVoipFragment(binder)
+        binder.initCallback(fragment.participantCallback, fragment.audioRoutingCallback)
         pushFragment(fragment)
     }
 

@@ -1,4 +1,4 @@
-package com.nigma.module_twilio.seg_interface
+package com.nigma.module_twilio.callbacks
 
 import com.twilio.video.Room
 

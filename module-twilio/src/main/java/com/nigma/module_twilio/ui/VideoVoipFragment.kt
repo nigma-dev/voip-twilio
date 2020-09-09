@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.nigma.module_twilio.R
 import com.nigma.module_twilio.base.BaseVoipFragment
+import com.nigma.module_twilio.service.VoipService
 import com.nigma.module_twilio.service.VoipService.ServiceBinder
 import com.twilio.video.RemoteVideoTrack
 import kotlinx.android.synthetic.main.fragment_voip_audio.*
@@ -36,12 +37,12 @@ class VideoVoipFragment(binder: ServiceBinder) : BaseVoipFragment(binder) {
 
         fab_camera_handle
             .setOnClickListener {
-                binder.clickCamera()
+                commandTheService(VoipService.ACTION_VOIP_HANDLE_CAMERA)
             }
 
         iv_btn_flip_cam
             .setOnClickListener {
-                binder.clickCameraFlip()
+                commandTheService(VoipService.ACTION_VOIP_HANDLE_CAMERA_FLIP)
             }
     }
 
