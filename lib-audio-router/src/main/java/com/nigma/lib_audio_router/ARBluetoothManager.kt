@@ -12,7 +12,7 @@ import android.media.AudioManager
 import timber.log.Timber
 
 class ARBluetoothManager(
-    private val adapter: BluetoothAdapter,
+    private val adapter: BluetoothAdapter?,
     val callback: (connected: Boolean) -> Unit
 ) {
 
@@ -25,8 +25,11 @@ class ARBluetoothManager(
             field = value
         }
 
-    private val listener by lazy { BluetoothHeadsetListener() }
-    private val receiver by lazy { BluetoothHeadsetReceiver() }
+    private val listener by
+    lazy { BluetoothHeadsetListener() }
+
+    private val receiver by
+    lazy { BluetoothHeadsetReceiver() }
 
 
     fun start(context: Context) {
@@ -76,7 +79,7 @@ class ARBluetoothManager(
             )
 
         adapter
-            .getProfileProxy(
+            ?.getProfileProxy(
                 context.applicationContext,
                 listener,
                 BluetoothProfile.HEADSET
@@ -106,6 +109,7 @@ class ARBluetoothManager(
 
     inner class BluetoothHeadsetReceiver : BroadcastReceiver() {
         override fun onReceive(p0: Context?, intent: Intent?) {
+            Timber.i("onReceive : $intent")
             if (intent == null) {
                 Timber.v("onReceive intent was null")
                 return

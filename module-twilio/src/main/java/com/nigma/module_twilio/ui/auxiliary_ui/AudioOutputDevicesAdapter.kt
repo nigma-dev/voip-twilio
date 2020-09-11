@@ -1,4 +1,4 @@
-package com.nigma.module_twilio.ui
+package com.nigma.module_twilio.ui.auxiliary_ui
 
 import android.view.LayoutInflater
 import android.view.View
@@ -7,19 +7,19 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.annotation.MainThread
 import androidx.recyclerview.widget.RecyclerView
+import com.nigma.lib_audio_router.model.AudioDevice
 import com.nigma.module_twilio.R
-import com.nigma.module_twilio.model.AudioDeviceModel
 import timber.log.Timber
 
 class AudioOutputDevicesAdapter(
-    private val callback: (device: AudioDeviceModel) -> Unit,
+    private val callback: (device: AudioDevice) -> Unit,
     private val audioOutputDevicesSheet: AudioOutputDevicesSheet
 ) : RecyclerView.Adapter<AudioOutputDevicesAdapter.ViewHolder>() {
 
-    private val audioDevices = mutableListOf<AudioDeviceModel>()
+    private val audioDevices = mutableListOf<AudioDevice>()
 
     @MainThread
-    fun addList(devices: List<AudioDeviceModel>) {
+    fun addList(devices: List<AudioDevice>) {
         audioDevices.clear()
         audioDevices.addAll(devices)
         Timber.v("addList | ${devices.size}")
@@ -45,14 +45,14 @@ class AudioOutputDevicesAdapter(
 
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
-        fun bind(audioDevicesModel: AudioDeviceModel) {
+        fun bind(device: AudioDevice) {
             itemView.setOnClickListener {
-                callback(audioDevicesModel)
+                callback(device)
                 audioOutputDevicesSheet.dismiss()
             }
             with(itemView) {
-                findViewById<TextView>(R.id.tv_audio_name).text = audioDevicesModel.name
-                findViewById<ImageView>(R.id.iv_audio_icon).setImageResource(audioDevicesModel.icon)
+                findViewById<TextView>(R.id.tv_audio_name).text = device.deviceName
+                findViewById<ImageView>(R.id.iv_audio_icon).setImageResource(device.icon)
             }
         }
     }

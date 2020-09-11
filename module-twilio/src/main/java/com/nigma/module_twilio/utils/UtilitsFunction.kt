@@ -7,7 +7,6 @@ import android.widget.Toast
 import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes
 import androidx.core.content.ContextCompat
-import androidx.fragment.app.Fragment
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.nigma.module_twilio.R
 
@@ -25,7 +24,7 @@ fun Service.toast(msg: String?) {
     }
 }
 
-fun Fragment.srcWhiteBgGreen(fab: FloatingActionButton, @DrawableRes src: Int) {
+fun srcWhiteBgGreen(fab: FloatingActionButton, @DrawableRes src: Int) {
     with(fab) {
         val drawable = ContextCompat.getDrawable(this.context, src)
         setImageDrawable(drawable)
@@ -34,7 +33,7 @@ fun Fragment.srcWhiteBgGreen(fab: FloatingActionButton, @DrawableRes src: Int) {
     }
 }
 
-fun Fragment.srcGreenBgWhite(fab: FloatingActionButton, @DrawableRes src: Int) {
+fun srcGreenBgWhite(fab: FloatingActionButton, @DrawableRes src: Int) {
     with(fab) {
         val drawable = ContextCompat.getDrawable(this.context, src)
         setImageDrawable(drawable)

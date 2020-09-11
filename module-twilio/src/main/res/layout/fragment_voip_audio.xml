@@ -34,14 +34,14 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="16dp"
-        android:src="@drawable/ic_mic"
-        app:backgroundTint="@color/color_green"
         app:layout_constraintBottom_toBottomOf="@+id/fab_audio_end"
         app:layout_constraintEnd_toStartOf="@+id/fab_audio_end"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintHorizontal_chainStyle="packed"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/fab_audio_end" />
+        app:layout_constraintTop_toTopOf="@+id/fab_audio_end"
+        tools:backgroundTint="@color/color_green"
+        tools:src="@drawable/ic_mic" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab_audio_output_handle"

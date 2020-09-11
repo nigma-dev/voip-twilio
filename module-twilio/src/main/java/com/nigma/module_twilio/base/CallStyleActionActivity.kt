@@ -9,8 +9,7 @@ import android.os.Handler
 import android.os.IBinder
 import android.os.Looper
 import android.view.View
-import com.nigma.module_twilio.service.VoipService
-import com.nigma.module_twilio.utils.removeFragmentStacks
+import com.nigma.module_twilio.VoipService
 import timber.log.Timber
 
 abstract class CallStyleActionActivity : GuardRelatedActivity(), ServiceConnection {
@@ -19,7 +18,7 @@ abstract class CallStyleActionActivity : GuardRelatedActivity(), ServiceConnecti
 
     private val service by lazy { Intent(applicationContext, VoipService::class.java) }
 
-    private var isBind = false
+    var isBind = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

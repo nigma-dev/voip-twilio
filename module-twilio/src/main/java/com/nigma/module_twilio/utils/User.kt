@@ -1,4 +1,4 @@
-package com.nigma.module_twilio.model
+package com.nigma.module_twilio.utils
 
 import java.io.Serializable
 

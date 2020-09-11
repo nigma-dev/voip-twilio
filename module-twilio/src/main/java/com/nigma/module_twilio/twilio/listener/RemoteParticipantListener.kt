@@ -1,10 +1,12 @@
-package com.nigma.module_twilio.callbacks
+package com.nigma.module_twilio.twilio.listener
 
+import com.nigma.module_twilio.twilio.TwilioManager
 import com.twilio.video.*
 import timber.log.Timber
 
-
-interface RemoteParticipantEvent : RemoteParticipant.Listener {
+class RemoteParticipantListener(
+    private val twilioManager: TwilioManager
+) : RemoteParticipant.Listener {
 
     override fun onAudioTrackPublished(
         remoteParticipant: RemoteParticipant,
@@ -34,11 +36,11 @@ interface RemoteParticipantEvent : RemoteParticipant.Listener {
         twilioException: TwilioException
     ) {
         Timber.i("onAudioTrackSubscriptionFailed")
-        onAudioTrackFailedError(
+        /*onAudioTrackFailedError(
             remoteParticipant,
             remoteAudioTrackPublication,
             twilioException
-        )
+        )*/
     }
 
     override fun onAudioTrackUnsubscribed(
@@ -76,6 +78,7 @@ interface RemoteParticipantEvent : RemoteParticipant.Listener {
         remoteVideoTrackPublication: RemoteVideoTrackPublication,
         remoteVideoTrack: RemoteVideoTrack
     ) {
+        twilioManager.onVideoTrackSubscribed(remoteParticipant,remoteVideoTrackPublication,remoteVideoTrack)
         Timber.i("onVideoTrackSubscribed")
     }
 
@@ -122,6 +125,11 @@ interface RemoteParticipantEvent : RemoteParticipant.Listener {
         remoteDataTrackPublication: RemoteDataTrackPublication,
         remoteDataTrack: RemoteDataTrack
     ) {
+        twilioManager.onDataTrackSubscribed(
+            remoteParticipant,
+            remoteDataTrackPublication,
+            remoteDataTrack
+        )
         Timber.i("onDataTrackSubscribed")
     }
 
@@ -154,7 +162,7 @@ interface RemoteParticipantEvent : RemoteParticipant.Listener {
         remoteAudioTrackPublication: RemoteAudioTrackPublication
     ) {
         Timber.i("onAudioTrackEnabled")
-        onRemoteAudioStateChange(remoteParticipant, remoteAudioTrackPublication)
+        twilioManager.onRemoteAudioStateChange(remoteParticipant, remoteAudioTrackPublication)
     }
 
     override fun onAudioTrackDisabled(
@@ -162,7 +170,7 @@ interface RemoteParticipantEvent : RemoteParticipant.Listener {
         remoteAudioTrackPublication: RemoteAudioTrackPublication
     ) {
         Timber.i("onAudioTrackDisabled")
-        onRemoteAudioStateChange(remoteParticipant, remoteAudioTrackPublication)
+        twilioManager.onRemoteAudioStateChange(remoteParticipant, remoteAudioTrackPublication)
     }
 
     override fun onVideoTrackEnabled(
@@ -170,7 +178,7 @@ interface RemoteParticipantEvent : RemoteParticipant.Listener {
         remoteVideoTrackPublication: RemoteVideoTrackPublication
     ) {
         Timber.i("onVideoTrackEnabled")
-        onRemoteVideoStateChange(remoteParticipant, remoteVideoTrackPublication)
+        twilioManager.onRemoteVideoStateChange(remoteParticipant, remoteVideoTrackPublication)
     }
 
     override fun onVideoTrackDisabled(
@@ -178,7 +186,7 @@ interface RemoteParticipantEvent : RemoteParticipant.Listener {
         remoteVideoTrackPublication: RemoteVideoTrackPublication
     ) {
         Timber.i("onVideoTrackDisabled")
-        onRemoteVideoStateChange(remoteParticipant, remoteVideoTrackPublication)
+        twilioManager.onRemoteVideoStateChange(remoteParticipant, remoteVideoTrackPublication)
     }
 
     override fun onVideoTrackSwitchedOn(
@@ -200,22 +208,9 @@ interface RemoteParticipantEvent : RemoteParticipant.Listener {
         networkQualityLevel: NetworkQualityLevel
     ) {
         Timber.i("onNetworkQualityLevelChanged")
+        twilioManager.onNetworkQualityLevelChanged(
+            remoteParticipant,
+            networkQualityLevel
+        )
     }
-
-
-    fun onRemoteAudioStateChange(
-        participant: RemoteParticipant,
-        publication: RemoteAudioTrackPublication
-    )
-
-    fun onRemoteVideoStateChange(
-        participant: RemoteParticipant,
-        publication: RemoteVideoTrackPublication
-    )
-
-    fun onAudioTrackFailedError(
-        remoteParticipant: RemoteParticipant,
-        remotePublication: TrackPublication,
-        twilioException: TwilioException
-    )
 }

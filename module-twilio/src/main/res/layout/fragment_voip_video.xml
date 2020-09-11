@@ -41,6 +41,11 @@
         tools:ignore="ContentDescription"
         tools:visibility="visible" />
 
+    <androidx.constraintlayout.widget.Group
+        android:id="@+id/group_local"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:constraint_referenced_ids="vv_primary,iv_btn_flip_cam" />
 
     <include
         android:id="@+id/include_profile"
@@ -55,7 +60,6 @@
         android:id="@+id/include_btn"
         layout="@layout/layout_video_buttons"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="8dp" />
+        android:layout_height="wrap_content" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

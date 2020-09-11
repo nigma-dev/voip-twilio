@@ -6,24 +6,21 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.media.AudioManager
-import android.media.RingtoneManager
-import android.net.Uri
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import com.nigma.module_twilio.R
-import com.nigma.module_twilio.service.VoipService
-import com.nigma.module_twilio.service.VoipService.Companion.ACTION_VOIP_HANDLE_MIC
+import com.nigma.module_twilio.VoipService
 import com.nigma.module_twilio.ui.VoipActivity
 import timber.log.Timber
 
 
-class VoipNotificationManager
-private constructor(private val context: Context, private val service: VoipService) {
+class VoipNotificationManager(
+    private val context: Context,
+    private val service: VoipService
+) {
 
     private val notificationManager by lazy { context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager }
-
 
 
     fun initialForeground() {
@@ -146,14 +143,6 @@ private constructor(private val context: Context, private val service: VoipServi
         notificationManager.createNotificationChannel(channel)
     }
 
-
-    companion object {
-        const val VOIP_CALL_CHANNEL = "VOIP-CALL-CHANNEL"
-
-        private lateinit var instance: VoipNotificationManager
-        fun getInstance(context: Context, service: VoipService): VoipNotificationManager {
-            if (!::instance.isInitialized) instance = VoipNotificationManager(context, service)
-            return instance
-        }
-    }
 }
+
+const val VOIP_CALL_CHANNEL = "VOIP-CALL-CHANNEL"

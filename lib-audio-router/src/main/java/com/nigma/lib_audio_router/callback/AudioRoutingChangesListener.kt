@@ -4,6 +4,6 @@ import com.nigma.lib_audio_router.model.AudioDevice
 
 interface AudioRoutingChangesListener {
 
-    fun onAudioRoutedDeviceChanged(audioDevice: AudioDevice, availableDevice: List<AudioDevice>)
+    fun onAudioRoutedDeviceChanged(selectedDevice: AudioDevice, availableDevice: List<AudioDevice>)
 
 }

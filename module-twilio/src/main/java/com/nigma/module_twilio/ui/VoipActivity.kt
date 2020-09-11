@@ -3,33 +3,31 @@ package com.nigma.module_twilio.ui
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import androidx.lifecycle.MutableLiveData
 import com.nigma.module_twilio.base.CallStyleActionActivity
-import com.nigma.module_twilio.model.User
-import com.nigma.module_twilio.service.VoipService
-import com.nigma.module_twilio.service.VoipService.Companion.KEY_USER_OBJECT
+import com.nigma.module_twilio.VoipService
+import com.nigma.module_twilio.VoipService.Companion.KEY_USER_OBJECT
+import com.nigma.module_twilio.utils.User
 import com.nigma.module_twilio.utils.pushFragment
 import com.nigma.module_twilio.utils.removeFragmentStacks
 import timber.log.Timber
 
 class VoipActivity : CallStyleActionActivity() {
 
-    val userLiveData = MutableLiveData<User>()
+    lateinit var user: User
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         try {
-            val user = intent.getSerializableExtra(KEY_USER_OBJECT) as User
-            userLiveData.value = user
+            user = intent.getSerializableExtra(KEY_USER_OBJECT) as User
         } catch (e: Exception) {
             Timber.e(e)
         }
-
     }
 
     override fun onServiceBounced(binder: VoipService.ServiceBinder) {
-        val fragment = if (binder.isVideoCall) VideoVoipFragment(binder) else AudioVoipFragment(binder)
-        binder.initCallback(fragment.participantCallback, fragment.audioRoutingCallback)
+        val fragment =
+            if (binder.isVideoCall) VideoVoipFragment(binder) else AudioVoipFragment(binder)
+        binder.initCallback(fragment.participantCallback, fragment.voipMediaActionStateCallback)
         pushFragment(fragment)
     }
 
@@ -38,11 +36,14 @@ class VoipActivity : CallStyleActionActivity() {
             .postDelayed(
                 {
                     removeFragmentStacks()
-                    finishAndRemoveTask()
+                    finish()
                 }, 200
             )
         Timber.i("clickHungUp")
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+    }
 }
 

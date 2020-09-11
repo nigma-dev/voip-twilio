@@ -7,8 +7,8 @@ import android.os.Handler
 import android.os.Looper
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.nigma.module_twilio.model.User
-import com.nigma.module_twilio.service.VoipService
+import com.nigma.module_twilio.utils.User
+import com.nigma.module_twilio.VoipService
 import kotlinx.android.synthetic.main.activity_main.*
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaType
@@ -16,7 +16,6 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONObject
 import timber.log.Timber
 import java.io.IOException
-import java.io.Serializable
 
 
 class MainActivity : AppCompatActivity(), Callback {

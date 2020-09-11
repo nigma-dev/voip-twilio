@@ -21,26 +21,26 @@
         android:id="@+id/fab_mic_handle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/ic_mic"
-        app:backgroundTint="@color/color_green"
         app:layout_constraintBottom_toBottomOf="@+id/fab_call_end"
         app:layout_constraintEnd_toStartOf="@+id/fab_call_end"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toEndOf="@+id/fab_audio_output"
         app:layout_constraintTop_toTopOf="@+id/fab_call_end"
-        tools:ignore="RelativeOverlap" />
+        tools:backgroundTint="@color/color_green"
+        tools:ignore="RelativeOverlap"
+        tools:src="@drawable/ic_mic" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab_camera_handle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/ic_video_black"
-        app:backgroundTint="@color/color_green"
         app:layout_constraintBottom_toBottomOf="@+id/fab_audio_output"
         app:layout_constraintEnd_toStartOf="@+id/fab_audio_output"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/fab_audio_output" />
+        app:layout_constraintTop_toTopOf="@+id/fab_audio_output"
+        tools:backgroundTint="@color/color_green"
+        tools:src="@drawable/ic_video_black" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab_audio_output"
