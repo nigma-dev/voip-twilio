@@ -4,7 +4,7 @@ import android.widget.TextView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import de.hdodenhof.circleimageview.CircleImageView
 
-interface VoipActionStateContract {
+interface VoipActionHookContract {
 
     fun btnAudio(): FloatingActionButton?
 

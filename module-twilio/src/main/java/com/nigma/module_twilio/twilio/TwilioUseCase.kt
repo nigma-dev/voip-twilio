@@ -1,70 +1,109 @@
 package com.nigma.module_twilio.twilio
 
+import android.Manifest
 import android.content.Context
+import androidx.annotation.RequiresPermission
 import com.twilio.video.*
 import com.twilio.video.CameraCapturer.CameraSource
 import timber.log.Timber
+import java.lang.ref.WeakReference
+import java.util.*
 
 
-class TwilioUseCase(private val context: Context) {
+class TwilioUseCase(private val captureSource: CameraCapturer) {
 
     private lateinit var room: Room
-    private lateinit var capturer: CameraCapturer
-
-    val localAudioTrack: LocalAudioTrack by lazy { createAudioLocalTrack() }
-
-    val localDataTrack: LocalDataTrack by lazy { createDataLocalTrack() }
-
-    val localVideoTrack: LocalVideoTrack by lazy { createVideoLocalTrack() }
 
 
-    private val localParticipant: LocalParticipant?
-        get() {
-            return room.localParticipant
+    var localParticipant: LocalParticipant? = null
+
+    lateinit var localAudioTrack: LocalAudioTrack
+    lateinit var localDataTrack: LocalDataTrack
+    lateinit var localVideoTrack: LocalVideoTrack
+
+    @Throws(Exception::class)
+    fun connectToRoom(
+        context: Context,
+        accessToken: String,
+        audioTrack: LocalAudioTrack,
+        dataTrack: LocalDataTrack,
+        roomListener: Room.Listener,
+        videoTrack: LocalVideoTrack? = null
+    ) {
+        val connectOptionsBuilder = ConnectOptions
+            .Builder(accessToken)
+            .audioTracks(Collections.singletonList(audioTrack))
+            .dataTracks(Collections.singletonList(dataTrack))
+            .enableAutomaticSubscription(true)
+            .enableNetworkQuality(true)
+
+        videoTrack?.let {
+            connectOptionsBuilder
+                .videoTracks(
+                    Collections.singletonList(it)
+                )
         }
-
-
-    fun connectToRoom(connectOptions: ConnectOptions, roomListener: Room.Listener) {
-        Timber.i("connectToRoom")
-        room = Video.connect(context.applicationContext, connectOptions, roomListener)
+        localAudioTrack = audioTrack
+        localDataTrack = dataTrack
+        if (videoTrack != null) {
+            localVideoTrack = videoTrack
+        }
+        room = Video.connect(
+            context.applicationContext,
+            connectOptionsBuilder.build(),
+            roomListener
+        )
     }
 
     fun disconnectFromRoom() {
         Timber.i("disconnectFromRoom")
+        if (room.remoteParticipants.size == 1){
+            localDataTrack.send("call ended by bla")
+        }
         releaseTracks()
         room.disconnect()
     }
 
-    fun handleMicrophone(enable: Boolean) {
+    fun handleMicrophone(enable: Boolean): Boolean {
         Timber.i("handleMicrophone $enable ")
         localAudioTrack.enable(enable)
+        return localAudioTrack.isEnabled
     }
 
-    fun handleVideoStream(enable: Boolean) {
+    fun handleVideoStream(enable: Boolean): Boolean {
         Timber.i("handleVideoStream $enable ")
+        if (!::localVideoTrack.isInitialized) return false
         localVideoTrack.enable(enable)
+        return localVideoTrack.isEnabled
     }
 
     fun switchCamera(): CameraSource {
-        Timber.i("handleVideoStream ${capturer.cameraSource.name}")
-        capturer.switchCamera()
-        return capturer.cameraSource
+        Timber.i("handleVideoStream ${captureSource.cameraSource.name}")
+        captureSource.switchCamera()
+        return captureSource.cameraSource
     }
 
 
-    fun publishLocalTrack(isVideoCall: Boolean) {
-        Timber.i("publishLocalTrack $isVideoCall")
-        Timber.i("publishLocalTrack audio ${localParticipant?.publishTrack(localAudioTrack)}")
-        Timber.i("publishLocalTrack data ${localParticipant?.publishTrack(localDataTrack)}")
-        if (isVideoCall)
-            Timber.i("publishLocalTrack video ${localParticipant?.publishTrack(localVideoTrack)}")
+    fun publishLocalTrack() {
+        Timber.i("publishLocalTrack}")
+        localParticipant?.let {
+            with(it) {
+                publishTrack(localDataTrack)
+                publishTrack(localAudioTrack)
+
+                if (::localVideoTrack.isInitialized) {
+                    publishTrack(localVideoTrack)
+                }
+            }
+        }
+
     }
 
-    private fun releaseTracks() {
+    fun releaseTracks() {
         Timber.i("releaseTracks")
-        with(localParticipant) {
-            this?.let {
-                val vTrack = it.localVideoTracks
+        localParticipant?.let { participant ->
+            with(participant) {
+                val vTrack = localVideoTracks
                 if (vTrack.isNotEmpty()) {
                     Timber.i("releaseTracks video release ${vTrack.size}")
                     for (track in vTrack) {
@@ -72,7 +111,7 @@ class TwilioUseCase(private val context: Context) {
                     }
                 }
 
-                val aTrack = it.localAudioTracks
+                val aTrack = localAudioTracks
                 if (aTrack.isNotEmpty()) {
                     Timber.i("releaseTracks audio release ${vTrack.size}")
                     for (track in aTrack) {
@@ -80,7 +119,7 @@ class TwilioUseCase(private val context: Context) {
                     }
                 }
 
-                val dTrack = it.localDataTracks
+                val dTrack = localDataTracks
                 if (dTrack.isNotEmpty()) {
                     Timber.i("releaseTracks data release ${vTrack.size}")
                     for (track in dTrack) {
@@ -91,34 +130,49 @@ class TwilioUseCase(private val context: Context) {
         }
     }
 
+}
 
-    @Throws(Exception::class)
-    private fun createAudioLocalTrack(): LocalAudioTrack {
-        return LocalAudioTrack
-            .create(
-                context,
-                true
-            )
-            ?: throw Exception("failed to create audio track , please check permission")
-    }
 
-    @Throws(Exception::class)
-    private fun createVideoLocalTrack(): LocalVideoTrack {
-        capturer = CameraCapturer(context, CameraSource.FRONT_CAMERA)
-        return LocalVideoTrack
-            .create(
-                context,
-                true,
-                capturer
-            )
-            ?: throw Exception("failed to create video track , please check permission")
-    }
+private val audioOptions: AudioOptions
+    get() = AudioOptions.Builder()
+        .audioJitterBufferFastAccelerate(true)
+        .autoGainControl(true)
+        .echoCancellation(true)
+        .noiseSuppression(true)
+        .stereoSwapping(true)
+        .highpassFilter(true)
+        .build()
 
-    @Throws(Exception::class)
-    private fun createDataLocalTrack(): LocalDataTrack {
-        Timber.i("createDataLocalTrack")
-        return LocalDataTrack
-            .create(context.applicationContext)
-            ?: throw Exception("failed to create data track , please check permission")
-    }
+private val dataTrackOptions: DataTrackOptions
+    get() = DataTrackOptions.Builder()
+        .ordered(true)
+        .build()
+
+@RequiresPermission(Manifest.permission.RECORD_AUDIO)
+fun createAudioTrack(
+    reference: WeakReference<Context>,
+    enable: Boolean = true,
+    options: AudioOptions = audioOptions
+): LocalAudioTrack? {
+    val context = reference.get()?.applicationContext ?: return null
+    return LocalAudioTrack.create(context, enable, options)
+}
+
+@RequiresPermission(Manifest.permission.CAMERA)
+fun createVideoTrack(
+    reference: WeakReference<Context>,
+    capturer: CameraCapturer,
+    enable: Boolean = true
+): LocalVideoTrack? {
+    val context = reference.get()?.applicationContext ?: return null
+    return LocalVideoTrack.create(context, enable, capturer)
+}
+
+
+fun createDataTrack(
+    reference: WeakReference<Context>,
+    options: DataTrackOptions = dataTrackOptions
+): LocalDataTrack? {
+    val context = reference.get()?.applicationContext ?: return null
+    return LocalDataTrack.create(context, options)
 }

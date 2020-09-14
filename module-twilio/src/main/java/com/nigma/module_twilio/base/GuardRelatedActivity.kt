@@ -11,7 +11,7 @@ abstract class GuardRelatedActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        handleScreenOverLockScreen()
+//        handleScreenOverLockScreen()
     }
 
     /**

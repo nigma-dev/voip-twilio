@@ -2,6 +2,7 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/csl_parent"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@android:color/white"
@@ -10,20 +11,18 @@
 
     <com.twilio.video.VideoView
         android:id="@+id/vv_secondary"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.0" />
+        app:layout_constraintTop_toTopOf="parent" />
 
 
     <com.twilio.video.VideoView
         android:id="@+id/vv_primary"
-        android:layout_width="110dp"
-        android:layout_height="150dp"
+        android:layout_width="96dp"
+        android:layout_height="146dp"
         android:layout_margin="8dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
@@ -40,12 +39,6 @@
         app:layout_constraintEnd_toEndOf="@+id/vv_primary"
         tools:ignore="ContentDescription"
         tools:visibility="visible" />
-
-    <androidx.constraintlayout.widget.Group
-        android:id="@+id/group_local"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:constraint_referenced_ids="vv_primary,iv_btn_flip_cam" />
 
     <include
         android:id="@+id/include_profile"

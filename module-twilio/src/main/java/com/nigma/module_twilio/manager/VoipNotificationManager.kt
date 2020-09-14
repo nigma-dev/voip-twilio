@@ -12,19 +12,23 @@ import androidx.core.app.NotificationCompat
 import com.nigma.module_twilio.R
 import com.nigma.module_twilio.VoipService
 import com.nigma.module_twilio.ui.VoipActivity
+import com.nigma.module_twilio.utils.ACTION_VOIP_DISCONNECT_ROOM
 import timber.log.Timber
 
 
 class VoipNotificationManager(
-    private val context: Context,
     private val service: VoipService
 ) {
+
+    private val context: Context
+        get() = service.applicationContext
 
     private val notificationManager by lazy { context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager }
 
 
     fun initialForeground() {
         val noti = createNotification("MyanCare", "Voip call service is running ...")
+            .setContentIntent(createContentIntent())
             .setSmallIcon(R.drawable.myancare_logo_white)
             .build()
         notificationManager.notify(1, noti)
@@ -79,17 +83,21 @@ class VoipNotificationManager(
         service.startForeground(1, noti)*/
     }
 
-    fun notifyTalkingCall() {
+    fun notifyTalkingCall(name: String) {
         Timber.v("notifyTalkingCall")
-        /*val noti = createNotification(opponentUser.name, "is talking with you")
+        val noti = createNotification(name, "is talking with you")
             .setSmallIcon(R.drawable.ic_answer_call)
             .setContentIntent(createContentIntent())
             .setWhen(System.currentTimeMillis())  // the time stamp, you will probably use System.currentTimeMillis() for most scenarios
             .setUsesChronometer(true)
-            .addAction(R.drawable.ic_end_call, "end", createActionIntent(ACTION_VOIP_HANDLE_MIC))
+            .addAction(
+                R.drawable.ic_end_call,
+                "end",
+                createActionIntent(ACTION_VOIP_DISCONNECT_ROOM)
+            )
             .build()
         notificationManager.notify(1, noti)
-        service.startForeground(1, noti)*/
+        service.startForeground(1, noti)
     }
 
     private fun createActionIntent(action: String): PendingIntent {

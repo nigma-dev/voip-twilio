@@ -7,8 +7,10 @@ import android.widget.Toast
 import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes
 import androidx.core.content.ContextCompat
+import com.bumptech.glide.Glide
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.nigma.module_twilio.R
+import de.hdodenhof.circleimageview.CircleImageView
 
 
 @Throws(IllegalArgumentException::class, NullPointerException::class)
@@ -44,4 +46,24 @@ fun srcGreenBgWhite(fab: FloatingActionButton, @DrawableRes src: Int) {
 
 fun getColor(context: Context, @ColorRes color: Int): ColorStateList {
     return ColorStateList.valueOf(ContextCompat.getColor(context, color))
+}
+
+
+fun loadImage(iv: CircleImageView?, url: String?) {
+    iv?.let {
+        Glide
+            .with(it.context)
+            .load(url)
+            .centerCrop()
+            .placeholder(getPlaceholder(it.context))
+            .into(it)
+    }
+}
+
+fun getPlaceholder(context: Context): Int {
+    return if (context.packageName.contains("doctor")) {
+        R.drawable.ic_user
+    } else {
+        R.drawable.ic_doctor
+    }
 }

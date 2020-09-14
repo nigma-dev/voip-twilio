@@ -1,25 +1,25 @@
 package com.nigma.module_twilio.twilio.listener
 
-import com.nigma.module_twilio.twilio.TwilioManager
+import com.nigma.module_twilio.twilio.TwilioManagerContract
 import com.twilio.video.*
 import timber.log.Timber
 
 class RemoteParticipantListener(
-    private val twilioManager: TwilioManager
+    private val contract: TwilioManagerContract
 ) : RemoteParticipant.Listener {
 
     override fun onAudioTrackPublished(
         remoteParticipant: RemoteParticipant,
         remoteAudioTrackPublication: RemoteAudioTrackPublication
     ) {
-        Timber.i("onAudioTrackPublished")
+//        contract.onTrackPublished(remoteParticipant, remoteAudioTrackPublication)
     }
 
     override fun onAudioTrackUnpublished(
         remoteParticipant: RemoteParticipant,
         remoteAudioTrackPublication: RemoteAudioTrackPublication
     ) {
-        Timber.i("onAudioTrackUnpublished")
+//        contract.onTrackUnpublished(remoteParticipant, remoteAudioTrackPublication)
     }
 
     override fun onAudioTrackSubscribed(
@@ -27,7 +27,7 @@ class RemoteParticipantListener(
         remoteAudioTrackPublication: RemoteAudioTrackPublication,
         remoteAudioTrack: RemoteAudioTrack
     ) {
-        Timber.i("onAudioTrackSubscribed")
+//        contract.onAudioTrackSubscribed(remoteParticipant, remoteAudioTrack)
     }
 
     override fun onAudioTrackSubscriptionFailed(
@@ -35,12 +35,11 @@ class RemoteParticipantListener(
         remoteAudioTrackPublication: RemoteAudioTrackPublication,
         twilioException: TwilioException
     ) {
-        Timber.i("onAudioTrackSubscriptionFailed")
-        /*onAudioTrackFailedError(
+        contract.onTrackSubscriptionFailed(
             remoteParticipant,
             remoteAudioTrackPublication,
             twilioException
-        )*/
+        )
     }
 
     override fun onAudioTrackUnsubscribed(
@@ -48,7 +47,7 @@ class RemoteParticipantListener(
         remoteAudioTrackPublication: RemoteAudioTrackPublication,
         remoteAudioTrack: RemoteAudioTrack
     ) {
-        Timber.i("onAudioTrackUnsubscribed")
+//        contract.onAudioTrackUnsubscribed(remoteParticipant, remoteAudioTrack)
     }
 
     override fun onAudioTrackPublishPriorityChanged(
@@ -63,6 +62,7 @@ class RemoteParticipantListener(
         remoteParticipant: RemoteParticipant,
         remoteVideoTrackPublication: RemoteVideoTrackPublication
     ) {
+//        contract.onTrackPublished(remoteParticipant, remoteVideoTrackPublication)
         Timber.i("onVideoTrackPublished")
     }
 
@@ -70,6 +70,7 @@ class RemoteParticipantListener(
         remoteParticipant: RemoteParticipant,
         remoteVideoTrackPublication: RemoteVideoTrackPublication
     ) {
+//        contract.onTrackUnpublished(remoteParticipant, remoteVideoTrackPublication)
         Timber.i("onVideoTrackUnpublished")
     }
 
@@ -78,8 +79,7 @@ class RemoteParticipantListener(
         remoteVideoTrackPublication: RemoteVideoTrackPublication,
         remoteVideoTrack: RemoteVideoTrack
     ) {
-        twilioManager.onVideoTrackSubscribed(remoteParticipant,remoteVideoTrackPublication,remoteVideoTrack)
-        Timber.i("onVideoTrackSubscribed")
+        contract.onVideoTrackSubscribed(remoteParticipant, remoteVideoTrack)
     }
 
     override fun onVideoTrackSubscriptionFailed(
@@ -87,7 +87,11 @@ class RemoteParticipantListener(
         remoteVideoTrackPublication: RemoteVideoTrackPublication,
         twilioException: TwilioException
     ) {
-        Timber.i("onVideoTrackSubscriptionFailed")
+        contract.onTrackSubscriptionFailed(
+            remoteParticipant,
+            remoteVideoTrackPublication,
+            twilioException
+        )
     }
 
     override fun onVideoTrackUnsubscribed(
@@ -95,7 +99,7 @@ class RemoteParticipantListener(
         remoteVideoTrackPublication: RemoteVideoTrackPublication,
         remoteVideoTrack: RemoteVideoTrack
     ) {
-        Timber.i("onVideoTrackUnsubscribed")
+//        contract.onVideoTrackUnsubscribed(remoteParticipant, remoteVideoTrack)
     }
 
     override fun onVideoTrackPublishPriorityChanged(
@@ -110,14 +114,14 @@ class RemoteParticipantListener(
         remoteParticipant: RemoteParticipant,
         remoteDataTrackPublication: RemoteDataTrackPublication
     ) {
-        Timber.i("onDataTrackPublished")
+//        contract.onTrackPublished(remoteParticipant,remoteDataTrackPublication)
     }
 
     override fun onDataTrackUnpublished(
         remoteParticipant: RemoteParticipant,
         remoteDataTrackPublication: RemoteDataTrackPublication
     ) {
-        Timber.i("onDataTrackUnpublished")
+//        contract.onTrackUnpublished(remoteParticipant,remoteDataTrackPublication)
     }
 
     override fun onDataTrackSubscribed(
@@ -125,12 +129,7 @@ class RemoteParticipantListener(
         remoteDataTrackPublication: RemoteDataTrackPublication,
         remoteDataTrack: RemoteDataTrack
     ) {
-        twilioManager.onDataTrackSubscribed(
-            remoteParticipant,
-            remoteDataTrackPublication,
-            remoteDataTrack
-        )
-        Timber.i("onDataTrackSubscribed")
+        contract.onDataTrackSubscribed(remoteParticipant, remoteDataTrack)
     }
 
     override fun onDataTrackSubscriptionFailed(
@@ -161,32 +160,40 @@ class RemoteParticipantListener(
         remoteParticipant: RemoteParticipant,
         remoteAudioTrackPublication: RemoteAudioTrackPublication
     ) {
-        Timber.i("onAudioTrackEnabled")
-        twilioManager.onRemoteAudioStateChange(remoteParticipant, remoteAudioTrackPublication)
+        contract.onAudioTrackStateChange(
+            remoteParticipant,
+            remoteAudioTrackPublication.isTrackEnabled
+        )
     }
 
     override fun onAudioTrackDisabled(
         remoteParticipant: RemoteParticipant,
         remoteAudioTrackPublication: RemoteAudioTrackPublication
     ) {
-        Timber.i("onAudioTrackDisabled")
-        twilioManager.onRemoteAudioStateChange(remoteParticipant, remoteAudioTrackPublication)
+        contract.onAudioTrackStateChange(
+            remoteParticipant,
+            remoteAudioTrackPublication.isTrackEnabled
+        )
     }
 
     override fun onVideoTrackEnabled(
         remoteParticipant: RemoteParticipant,
         remoteVideoTrackPublication: RemoteVideoTrackPublication
     ) {
-        Timber.i("onVideoTrackEnabled")
-        twilioManager.onRemoteVideoStateChange(remoteParticipant, remoteVideoTrackPublication)
+        contract.onVideoTrackStateChange(
+            remoteParticipant,
+            remoteVideoTrackPublication.isTrackEnabled
+        )
     }
 
     override fun onVideoTrackDisabled(
         remoteParticipant: RemoteParticipant,
         remoteVideoTrackPublication: RemoteVideoTrackPublication
     ) {
-        Timber.i("onVideoTrackDisabled")
-        twilioManager.onRemoteVideoStateChange(remoteParticipant, remoteVideoTrackPublication)
+        contract.onVideoTrackStateChange(
+            remoteParticipant,
+            remoteVideoTrackPublication.isTrackEnabled
+        )
     }
 
     override fun onVideoTrackSwitchedOn(
@@ -207,8 +214,7 @@ class RemoteParticipantListener(
         remoteParticipant: RemoteParticipant,
         networkQualityLevel: NetworkQualityLevel
     ) {
-        Timber.i("onNetworkQualityLevelChanged")
-        twilioManager.onNetworkQualityLevelChanged(
+        contract.onNetworkQualityLevelChanged(
             remoteParticipant,
             networkQualityLevel
         )

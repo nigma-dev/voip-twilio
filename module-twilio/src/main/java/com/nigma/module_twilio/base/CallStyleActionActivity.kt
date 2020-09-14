@@ -1,5 +1,6 @@
 package com.nigma.module_twilio.base
 
+import android.app.ActivityManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -10,6 +11,7 @@ import android.os.IBinder
 import android.os.Looper
 import android.view.View
 import com.nigma.module_twilio.VoipService
+import com.nigma.module_twilio.VoipServiceBinder
 import timber.log.Timber
 
 abstract class CallStyleActionActivity : GuardRelatedActivity(), ServiceConnection {
@@ -18,7 +20,7 @@ abstract class CallStyleActionActivity : GuardRelatedActivity(), ServiceConnecti
 
     private val service by lazy { Intent(applicationContext, VoipService::class.java) }
 
-    var isBind = false
+    private var isBind = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -38,7 +40,7 @@ abstract class CallStyleActionActivity : GuardRelatedActivity(), ServiceConnecti
 
     override fun onServiceConnected(p0: ComponentName?, p1: IBinder?) {
         p1 ?: return
-        val binder = p1 as VoipService.ServiceBinder
+        val binder = p1 as VoipServiceBinder
         isBind = true
         onServiceBounced(binder)
         Timber.i("onServiceConnected")
@@ -49,7 +51,7 @@ abstract class CallStyleActionActivity : GuardRelatedActivity(), ServiceConnecti
         Timber.i("onServiceDisconnected ")
     }
 
-    abstract fun onServiceBounced(binder: VoipService.ServiceBinder)
+    abstract fun onServiceBounced(binder: VoipServiceBinder)
 
     protected open fun onShowSystemUi() {
         showSysUi()

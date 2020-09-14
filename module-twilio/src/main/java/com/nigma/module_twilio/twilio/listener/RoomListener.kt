@@ -1,57 +1,45 @@
 package com.nigma.module_twilio.twilio.listener
 
-import com.nigma.module_twilio.twilio.TwilioManager
+import com.nigma.module_twilio.twilio.TwilioManagerContract
 import com.twilio.video.RemoteParticipant
 import com.twilio.video.Room
 import com.twilio.video.TwilioException
-import timber.log.Timber
 
 class RoomListener(
-    private val twilioManager: TwilioManager
+    private val contract: TwilioManagerContract
 ) : Room.Listener {
 
     override fun onConnected(room: Room) {
-        Timber.i("onConnected")
-        twilioManager.publishLocalTrack(room)
-        for (participant in room.remoteParticipants) {
-            twilioManager.addParticipantAndSubscribe(participant)
-        }
+        contract.onRoomConnected(room)
     }
 
     override fun onConnectFailure(room: Room, twilioException: TwilioException) {
-        Timber.i("onConnectFailure")
+        contract.onRoomConnectStateChange(room, twilioException)
     }
 
     override fun onReconnecting(room: Room, twilioException: TwilioException) {
-        Timber.i("onReconnecting")
+        contract.onRoomConnectStateChange(room, twilioException)
     }
 
     override fun onReconnected(room: Room) {
-        Timber.i("onReconnected")
+        contract.onRoomConnectStateChange(room)
     }
 
     override fun onDisconnected(room: Room, twilioException: TwilioException?) {
-        Timber.i("onDisconnected")
-        twilioManager.onDisconnected()
+        contract.onRoomDisconnected(room, twilioException)
     }
 
     override fun onParticipantConnected(room: Room, remoteParticipant: RemoteParticipant) {
-        Timber.i("onParticipantConnected")
-        twilioManager.addParticipantAndSubscribe(remoteParticipant)
+        contract.onParticipantConnected(room, remoteParticipant)
     }
 
     override fun onParticipantDisconnected(room: Room, remoteParticipant: RemoteParticipant) {
-        Timber.i("onParticipantDisconnected")
-        twilioManager.removeParticipantAndSubscribe(remoteParticipant)
+        contract.onParticipantDisconnected(room, remoteParticipant)
     }
 
-    override fun onRecordingStarted(room: Room) {
-        Timber.i("onRecordingStarted")
-    }
+    override fun onRecordingStarted(room: Room) {}
 
-    override fun onRecordingStopped(room: Room) {
-        Timber.i("onRecordingStopped")
-    }
+    override fun onRecordingStopped(room: Room) {}
 
 
 }

@@ -23,18 +23,19 @@
         android:background="@color/color_green"
         android:paddingStart="8dp"
         android:paddingEnd="8dp"
-        android:text="Dr Shwe Zin Win "
         android:textColor="@android:color/white"
         android:textSize="16sp"
-        android:textStyle="bold" />
+        android:textStyle="bold"
+        tools:text="Dr Shwe Zin Win " />
 
 
     <TextView
         android:id="@+id/tv_status"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="calling ..."
+        android:text="CONNECTING ..."
         android:textColor="@color/color_green"
-        android:textStyle="bold" />
+        android:textStyle="bold"
+        tools:ignore="HardcodedText" />
 
 </LinearLayout>

@@ -7,11 +7,10 @@ import android.view.ViewGroup
 import android.widget.TextView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.nigma.module_twilio.R
-import com.nigma.module_twilio.base.BaseVoipFragment
-import com.nigma.module_twilio.VoipService.ServiceBinder
+import com.nigma.module_twilio.VoipServiceBinder
 import de.hdodenhof.circleimageview.CircleImageView
 
-class AudioVoipFragment(binder: ServiceBinder) : BaseVoipFragment(binder) {
+class AudioVoipFragment(binder: VoipServiceBinder) : VoipFragment(binder) {
 
     override fun onCreateView(
         inflater: LayoutInflater,

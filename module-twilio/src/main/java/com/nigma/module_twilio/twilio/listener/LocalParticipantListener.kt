@@ -1,18 +1,17 @@
 package com.nigma.module_twilio.twilio.listener
 
-import com.nigma.module_twilio.twilio.TwilioManager
+import com.nigma.module_twilio.twilio.TwilioManagerContract
 import com.twilio.video.*
-import timber.log.Timber
 
 class LocalParticipantListener(
-    private val twilioManager: TwilioManager
-): LocalParticipant.Listener{
+    private val contract: TwilioManagerContract
+) : LocalParticipant.Listener {
 
     override fun onAudioTrackPublished(
         localParticipant: LocalParticipant,
         localAudioTrackPublication: LocalAudioTrackPublication
     ) {
-        Timber.i("onAudioTrackPublished")
+//        contract.onTrackPublished(localParticipant, localAudioTrackPublication)
     }
 
     override fun onAudioTrackPublicationFailed(
@@ -20,14 +19,14 @@ class LocalParticipantListener(
         localAudioTrack: LocalAudioTrack,
         twilioException: TwilioException
     ) {
-        Timber.i("onAudioTrackPublicationFailed")
+        contract.onTrackPublicationFailed(localParticipant, localAudioTrack, twilioException)
     }
 
     override fun onVideoTrackPublished(
         localParticipant: LocalParticipant,
         localVideoTrackPublication: LocalVideoTrackPublication
     ) {
-        Timber.i("onVideoTrackPublished")
+//        contract.onTrackPublished(localParticipant, localVideoTrackPublication)
     }
 
     override fun onVideoTrackPublicationFailed(
@@ -35,14 +34,14 @@ class LocalParticipantListener(
         localVideoTrack: LocalVideoTrack,
         twilioException: TwilioException
     ) {
-        Timber.i("onVideoTrackPublicationFailed")
+        contract.onTrackPublicationFailed(localParticipant, localVideoTrack, twilioException)
     }
 
     override fun onDataTrackPublished(
         localParticipant: LocalParticipant,
         localDataTrackPublication: LocalDataTrackPublication
     ) {
-        Timber.i("onDataTrackPublished")
+//        contract.onTrackPublished(localParticipant, localDataTrackPublication)
     }
 
     override fun onDataTrackPublicationFailed(
@@ -50,6 +49,6 @@ class LocalParticipantListener(
         localDataTrack: LocalDataTrack,
         twilioException: TwilioException
     ) {
-        Timber.i("onDataTrackPublicationFailed")
+        contract.onTrackPublicationFailed(localParticipant, localDataTrack, twilioException)
     }
 }

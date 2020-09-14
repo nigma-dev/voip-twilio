@@ -7,13 +7,13 @@
         <option name="testRunner" value="PLATFORM" />
         <option name="distributionType" value="DEFAULT_WRAPPED" />
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
-        <option name="gradleJvm" value="1.8" />
         <option name="modules">
           <set>
-            <option value="/mnt/projects/VoipTwilioPOC" />
-            <option value="/mnt/projects/VoipTwilioPOC/app" />
-            <option value="/mnt/projects/VoipTwilioPOC/lib-audio-router" />
-            <option value="/mnt/projects/VoipTwilioPOC/module-twilio" />
+            <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/app" />
+            <option value="$PROJECT_DIR$/lib-audio-router" />
+            <option value="$PROJECT_DIR$/module-twilio" />
+            <option value="$PROJECT_DIR$/module-voip-ui" />
           </set>
         </option>
         <option name="resolveModulePerSourceSet" value="false" />

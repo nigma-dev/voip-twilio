@@ -101,8 +101,14 @@ constructor(
 
 
     fun release() {
-        arBlueManager.stop(context)
-        arAudioJackManager.stop(context)
+        try {
+            arBlueManager.stop(context)
+            arAudioJackManager.stop(context)
+            androidAudioManager.mode = AudioManager.MODE_NORMAL
+            setDevice(AudioDevice.SPEAKER)
+        } catch (e: Exception) {
+            Timber.e(e)
+        }
     }
 
     @Throws(IllegalArgumentException::class)

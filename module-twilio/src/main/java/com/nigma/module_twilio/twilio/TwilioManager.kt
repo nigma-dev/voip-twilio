@@ -1,198 +1,141 @@
 package com.nigma.module_twilio.twilio
 
-import com.nigma.module_twilio.VoipService
-import com.nigma.module_twilio.callbacks.WrappedParticipantEvent
-import com.nigma.module_twilio.twilio.listener.DataTrackListener
+import android.content.Context
+import com.nigma.module_twilio.VoipServiceContract
+import com.nigma.module_twilio.callbacks.VoipParticipantStateContract
 import com.nigma.module_twilio.twilio.listener.LocalParticipantListener
-import com.nigma.module_twilio.twilio.listener.RemoteParticipantListener
 import com.nigma.module_twilio.twilio.listener.RoomListener
 import com.twilio.video.*
-import timber.log.Timber
-import tvi.webrtc.voiceengine.WebRtcAudioUtils
-import java.util.*
-import kotlin.collections.HashMap
 
 
 class TwilioManager(
-    private val twilioUseCase: TwilioUseCase,
-    private val voipService: VoipService
-) {
+    private val contract: VoipServiceContract,
+    capturer: CameraCapturer
+) : TwilioManagerContract {
 
-    var participantCallback: WrappedParticipantEvent? = null
+    var participantCallback: VoipParticipantStateContract? = null
 
-    var isVideoCommunication = false
+    val localMediaManager by lazy {
+        TwilioLocalMediaManager(twilioUseCase)
+    }
 
-    val localVideoTrack: LocalVideoTrack?
-        get() {
-            return twilioUseCase.localVideoTrack
-        }
+    private val twilioUseCase = TwilioUseCase(capturer)
 
     private val roomListener = RoomListener(this@TwilioManager)
 
-    private val dataTrackMap: HashMap<RemoteParticipant, RemoteDataTrack> = hashMapOf()
-
+    private val participantManager = ParticipantManager(this)
 
     @Throws(Exception::class)
-    fun connectRoom(accessToken: String?) {
+    fun connectRoom(
+        context: Context,
+        accessToken: String?,
+        audioTrack: LocalAudioTrack,
+        dataTrack: LocalDataTrack,
+        videoTrack: LocalVideoTrack? = null
+    ) {
         accessToken ?: throw Exception("token is require to connect to the room")
-        Timber.i("connectRoom")
-        with(twilioUseCase) {
-            val connectOptionsBuilder = ConnectOptions
-                .Builder(accessToken)
-                .audioTracks(Collections.singletonList(localAudioTrack))
-                .dataTracks(Collections.singletonList(localDataTrack))
-                .enableAutomaticSubscription(true)
-                .enableNetworkQuality(true)
-
-            if (isVideoCommunication) connectOptionsBuilder
-                .videoTracks(
-                    Collections.singletonList(
-                        twilioUseCase
-                            .localVideoTrack
-                    )
-                )
-            connectToRoom(
-                connectOptionsBuilder.build(),
-                roomListener
-            )
-        }
+        TwilioLocalMediaManager.suppressNoiseAndEcho()
+        twilioUseCase.connectToRoom(
+            context,
+            accessToken,
+            audioTrack,
+            dataTrack,
+            roomListener,
+            videoTrack
+        )
     }
 
     fun disconnectRoom() {
-        Timber.i("disconnectRoom")
         twilioUseCase.disconnectFromRoom()
     }
 
-    fun handleMicrophone(): Boolean {
-        with(twilioUseCase) {
-            this.handleMicrophone(!localAudioTrack.isEnabled)
-            Timber.i("handleMicrophone ${localAudioTrack.isEnabled}")
-            return localAudioTrack.isEnabled
-        }
+    override fun onRoomConnectFailure(room: Room, twilioException: TwilioException) {
+        contract.onRoomConnectFailure(room, twilioException)
     }
 
-    fun setDataTrack() {
-        twilioUseCase.localDataTrack.send("hey i am ")
+    @Throws(Exception::class)
+    override fun onRoomConnected(room: Room) {
+        val participant = room.localParticipant
+            ?: throw Exception("LocalParticipant was null on room connected")
+        twilioUseCase.localParticipant = participant
+        participant.setListener(LocalParticipantListener(this))
+        localMediaManager.publishLocalMediaTrack()
+        participantManager.addAllParticipantAndSubscribe(room)
+        contract.onRoomConnected(room)
     }
 
-    fun handleCameraOnOff(): Boolean {
-        with(twilioUseCase) {
-            this.handleVideoStream(!localVideoTrack.isEnabled)
-            timber.log.Timber.i("handleCameraOnOff ${localVideoTrack.isEnabled}")
-            return localVideoTrack.isEnabled
-        }
+    override fun onRoomDisconnected(room: Room, twilioException: TwilioException?) {
+        contract.onRoomConnectStateChange(room, twilioException)
     }
 
-    fun handleCameraFlip(): CameraCapturer.CameraSource {
-        return twilioUseCase.switchCamera()
+    override fun onRoomConnectStateChange(room: Room, twilioException: TwilioException?) {
+        contract.onRoomConnectStateChange(room, twilioException)
     }
 
-    fun getMicrophoneState(): Boolean {
-        return twilioUseCase.localAudioTrack.isEnabled
+    override fun onParticipantConnected(room: Room, remoteParticipant: RemoteParticipant) {
+        participantManager.addParticipantAndSubscribe(remoteParticipant)
+        participantCallback?.onParticipantNewConnected(remoteParticipant)
     }
 
-    fun getVideoCameraState(): Boolean {
-        return twilioUseCase.localVideoTrack.isEnabled
+    override fun onParticipantDisconnected(room: Room, remoteParticipant: RemoteParticipant) {
+        participantManager.removeParticipantAndSubscribe(remoteParticipant)
+        contract.onParticipantDisconnected(room, remoteParticipant)
     }
 
-    fun onDataTrackSubscribed(
+    override fun onMessage(remoteDataTrack: RemoteDataTrack, message: String) {
+        contract.onCommunicationCommand(message)
+    }
+
+    override fun onTrackSubscriptionFailed(
+        participant: Participant,
+        trackPublication: TrackPublication,
+        twilioException: TwilioException
+    ) {
+        contract.onTrackSubscriptionFailed(
+            participant,
+            trackPublication,
+            twilioException
+        )
+    }
+
+    override fun onTrackPublicationFailed(
+        participant: Participant,
+        track: Track,
+        twilioException: TwilioException
+    ) {
+        contract.onTrackPublicationFailed(
+            participant,
+            track,
+            twilioException
+        )
+    }
+
+    override fun onDataTrackSubscribed(
         remoteParticipant: RemoteParticipant,
-        remoteDataTrackPublication: RemoteDataTrackPublication,
         remoteDataTrack: RemoteDataTrack
     ) {
-        addRemoteDataTrack(remoteParticipant, remoteDataTrack)
+        participantManager.addRemoteDataTrack(remoteParticipant, remoteDataTrack)
     }
 
-
-    fun onVideoTrackSubscribed(
+    override fun onVideoTrackSubscribed(
         remoteParticipant: RemoteParticipant,
-        remoteVideoTrackPublication: RemoteVideoTrackPublication,
         remoteVideoTrack: RemoteVideoTrack
     ) {
-        participantCallback?.onVideoTrackAvailable(remoteVideoTrack)
+        participantCallback?.onParticipantVideoTrackAvailable(remoteParticipant, remoteVideoTrack)
     }
 
-
-    fun onRemoteAudioStateChange(
-        participant: RemoteParticipant,
-        publication: RemoteAudioTrackPublication
-    ) {
-        participantCallback
-            ?.onAudioTrackStateChange(publication.isTrackEnabled)
+    override fun onVideoTrackStateChange(remoteParticipant: RemoteParticipant, enable: Boolean) {
+        participantCallback?.onParticipantVideoTrackStateChange(remoteParticipant, enable)
     }
 
-    fun onRemoteVideoStateChange(
-        participant: RemoteParticipant,
-        publication: RemoteVideoTrackPublication
-    ) {
-        participantCallback
-            ?.onVideoTrackStateChange(publication.isTrackEnabled)
+    override fun onAudioTrackStateChange(remoteParticipant: RemoteParticipant, enable: Boolean) {
+        participantCallback?.onParticipantAudioTrackStateChange(remoteParticipant, enable)
     }
 
-
-    fun onNetworkQualityLevelChanged(
+    override fun onNetworkQualityLevelChanged(
         remoteParticipant: RemoteParticipant,
         networkQualityLevel: NetworkQualityLevel
     ) {
-        participantCallback
-            ?.onNetworkStateChange(remoteParticipant, networkQualityLevel)
+        contract.onNetworkQualityLevelChanged(remoteParticipant, networkQualityLevel)
     }
-
-    fun publishLocalTrack(room: Room) {
-        room.localParticipant?.setListener(LocalParticipantListener(this))
-        twilioUseCase.publishLocalTrack(isVideoCommunication)
-    }
-
-
-    fun addParticipantAndSubscribe(remoteParticipant: RemoteParticipant) {
-        remoteParticipant.setListener(RemoteParticipantListener(this))
-        subscribeDataTrack(remoteParticipant)
-    }
-
-    fun removeParticipantAndSubscribe(remoteParticipant: RemoteParticipant) {
-        unsubscribeDataTrack(remoteParticipant)
-    }
-
-
-    fun suppressNoiseAndEcho() {
-        WebRtcAudioUtils.setWebRtcBasedAcousticEchoCanceler(true)
-        WebRtcAudioUtils.setWebRtcBasedNoiseSuppressor(true)
-        WebRtcAudioUtils.setWebRtcBasedAutomaticGainControl(true)
-    }
-
-
-    private fun subscribeDataTrack(participant: RemoteParticipant) {
-        for (publication in participant.remoteDataTracks) {
-            val track = publication.remoteDataTrack
-            if (publication.isTrackSubscribed && track != null) {
-                addRemoteDataTrack(participant, track)
-            }
-        }
-    }
-
-    private fun addRemoteDataTrack(participant: RemoteParticipant, dataTrack: RemoteDataTrack) {
-        dataTrackMap[participant] = dataTrack
-        dataTrack.setListener(DataTrackListener(this))
-    }
-
-
-    private fun unsubscribeDataTrack(participant: RemoteParticipant) {
-        for (publication in participant.remoteDataTracks) {
-            val track = publication.remoteDataTrack
-            if (publication.isTrackSubscribed && track != null) {
-                removeRemoteDataTrack(participant, track)
-            }
-        }
-    }
-
-    private fun removeRemoteDataTrack(participant: RemoteParticipant, dataTrack: RemoteDataTrack) {
-        dataTrackMap.remove(participant)
-        dataTrack.setListener(null)
-    }
-
-    fun onDisconnected() {
-        voipService.stopSelf()
-    }
-
-
 }
