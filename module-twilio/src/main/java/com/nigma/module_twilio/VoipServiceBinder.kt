@@ -9,6 +9,7 @@ import com.nigma.module_twilio.twilio.TwilioLocalMediaManager
 import com.nigma.module_twilio.ui.VoipFragment
 import com.nigma.module_twilio.utils.User
 import com.twilio.video.LocalVideoTrack
+import timber.log.Timber
 
 class VoipServiceBinder(
     private val service: VoipService
@@ -21,6 +22,7 @@ class VoipServiceBinder(
 
     var participantCallback: VoipParticipantStateContract? = null
         set(value) {
+            Timber.d("VoipParticipantStateContract")
             service.twilioManager.participantCallback = value
             field = value
         }
@@ -30,9 +32,6 @@ class VoipServiceBinder(
 
     val auxiliaryAvailable: Boolean
         get() = audioManager.isAuxiliaryAudioDevice
-
-    val localParticipant
-        get() = mediaManager.localParticipant
 
     val localVideoTrack: LocalVideoTrack?
         get() = mediaManager.localVideoTrack
@@ -52,11 +51,13 @@ class VoipServiceBinder(
     fun initCallback(
         callback: VoipFragment,
     ) {
+        Timber.d("initCallback")
         this.participantCallback = callback
         this.voipLocalMediaStateCallback = callback
     }
 
     fun releaseCallback() {
+        Timber.d("releaseCallback")
         this.participantCallback = null
         this.voipLocalMediaStateCallback = null
     }

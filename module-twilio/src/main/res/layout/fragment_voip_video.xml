@@ -30,11 +30,12 @@
 
     <ImageButton
         android:id="@+id/iv_btn_flip_cam"
-        android:layout_width="46dp"
-        android:layout_height="46dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:scaleType="centerCrop"
-        android:src="@drawable/ic_baseline_flip_camera_ios_24"
+        android:src="@drawable/ic_flip_camera"
         android:visibility="gone"
+        android:backgroundTint="@android:color/transparent"
         app:layout_constraintBottom_toBottomOf="@+id/vv_primary"
         app:layout_constraintEnd_toEndOf="@+id/vv_primary"
         tools:ignore="ContentDescription"

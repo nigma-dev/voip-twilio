@@ -4,21 +4,18 @@ import android.Manifest
 import android.app.Service
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.os.Handler
 import android.os.IBinder
-import android.os.Looper
+import com.enigma.lib_call_media.CallMediaManager
 import com.nigma.lib_audio_router.AudioRoutingManager
 import com.nigma.lib_audio_router.model.AudioDevice.EARPIECE
 import com.nigma.lib_audio_router.model.AudioDevice.SPEAKER
 import com.nigma.module_twilio.exception.*
 import com.nigma.module_twilio.manager.VoipNotificationManager
-import com.nigma.module_twilio.twilio.TwilioManager
-import com.nigma.module_twilio.twilio.createAudioTrack
-import com.nigma.module_twilio.twilio.createDataTrack
-import com.nigma.module_twilio.twilio.createVideoTrack
+import com.nigma.module_twilio.twilio.*
 import com.nigma.module_twilio.ui.VoipActivity
 import com.nigma.module_twilio.utils.*
 import com.twilio.video.*
+import com.twilio.video.Room.State.*
 import timber.log.Timber
 import java.lang.ref.WeakReference
 
@@ -38,6 +35,10 @@ class VoipService : Service(), VoipServiceContract {
         AudioRoutingManager(applicationContext, clickHandler)
     }
 
+    val broadcaster by lazy {
+        VoipEventBroadcaster(WeakReference(applicationContext))
+    }
+
     private val capturer by lazy {
         CameraCapturer(
             applicationContext,
@@ -45,7 +46,11 @@ class VoipService : Service(), VoipServiceContract {
         )
     }
 
-    private val binder = VoipServiceBinder(this,)
+    private val callMediaManager by lazy {
+        CallMediaManager(WeakReference(applicationContext))
+    }
+
+    private val binder = VoipServiceBinder(this)
 
     private val clickHandler = VoipServiceActionHandler(binder)
 
@@ -67,11 +72,13 @@ class VoipService : Service(), VoipServiceContract {
     override fun onCreate() {
         super.onCreate()
         Timber.i("onCreate")
+        TwilioLocalMediaManager.suppressNoiseAndEcho()
         Thread.setDefaultUncaughtExceptionHandler(exceptionHandler)
     }
 
     override fun onDestroy() {
         Timber.i("onDestroy")
+        callMediaManager.release()
         audioRouteManager.release()
         stopForeground(true)
         super.onDestroy()
@@ -143,12 +150,12 @@ class VoipService : Service(), VoipServiceContract {
             )
             notiManager.initialForeground()
         }
-        audioRouteManager.start()
         with(Intent(applicationContext, VoipActivity::class.java)) {
             putExtras(intent)
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             startActivity(this)
         }
+        callMediaManager.callConnecting()
     }
 
     override fun onCommunicationCommand(message: String) {
@@ -156,36 +163,33 @@ class VoipService : Service(), VoipServiceContract {
     }
 
     override fun onRoomConnected(room: Room) {
-        Handler(Looper.getMainLooper()).postDelayed({
+        Timber.i("onRoomConnected ${room.state} | $localCallback")
+        audioRouteManager.start()
+        callMediaManager.callConnected()
+        localCallback?.onConnectionStateChange(room.state.name)
+        /*Handler(Looper.getMainLooper()).postDelayed({
             if (room.remoteParticipants.size == 0) {
                 toast("nobody connect the room ,i will exit")
                 twilioManager.disconnectRoom()
             }
-        }, 30 * 1000)
+        }, 30 * 1000)*/
     }
 
     override fun onRoomConnectStateChange(room: Room, twilioException: TwilioException?) {
+        Timber.i("onRoomConnectStateChange ${room.state}")
         localCallback?.onConnectionStateChange(room.state.name)
-        if (room.state == Room.State.DISCONNECTED){
-            twilioManager.localMediaManager.releaseLocalMediaTrack()
-            stopSelf()
+        when (room.state) {
+            CONNECTING -> callMediaManager.callConnecting()
+            CONNECTED -> callMediaManager.callConnected()
+            RECONNECTING -> callMediaManager.callConnecting()
+            DISCONNECTED -> thisStopService()
         }
-        /*if (room.remoteParticipants.size == 0) {
-            Handler(Looper.getMainLooper()).postDelayed({
-                toast("need to exit the room")
-                twilioManager.disconnectRoom()
-            }, 30 * 1000)
-        }*/
     }
 
     override fun onParticipantDisconnected(room: Room, remoteParticipant: RemoteParticipant) {
-        toast("user ${remoteParticipant.identity} disconnected")
-        Handler(Looper.getMainLooper()).postDelayed({
-            if (room.remoteParticipants.size == 0) {
-                toast("nobody is here i will leave the room")
-                twilioManager.disconnectRoom()
-            }
-        }, 30 * 1000)
+        Timber.i("onParticipantDisconnected ${room.state}")
+        callMediaManager.callParticipantConnected()
+        twilioManager.disconnectRoom()
     }
 
     override fun onRoomConnectFailure(room: Room, twilioException: TwilioException) {
@@ -222,8 +226,15 @@ class VoipService : Service(), VoipServiceContract {
         remoteParticipant: RemoteParticipant,
         networkQualityLevel: NetworkQualityLevel
     ) {
+        Timber.i("onNetworkQualityLevelChanged |remote ${networkQualityLevel.name}")
         callback?.onParticipantNetworkStateChange(remoteParticipant, networkQualityLevel)
     }
     /*endregion*/
+
+    private fun thisStopService() {
+        broadcaster.broadcastServiceStopAction()
+        stopForeground(true)
+        stopSelf()
+    }
 }
 

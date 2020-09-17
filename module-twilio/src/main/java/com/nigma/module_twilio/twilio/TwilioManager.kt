@@ -6,6 +6,7 @@ import com.nigma.module_twilio.callbacks.VoipParticipantStateContract
 import com.nigma.module_twilio.twilio.listener.LocalParticipantListener
 import com.nigma.module_twilio.twilio.listener.RoomListener
 import com.twilio.video.*
+import timber.log.Timber
 
 
 class TwilioManager(
@@ -34,7 +35,6 @@ class TwilioManager(
         videoTrack: LocalVideoTrack? = null
     ) {
         accessToken ?: throw Exception("token is require to connect to the room")
-        TwilioLocalMediaManager.suppressNoiseAndEcho()
         twilioUseCase.connectToRoom(
             context,
             accessToken,
@@ -65,24 +65,30 @@ class TwilioManager(
     }
 
     override fun onRoomDisconnected(room: Room, twilioException: TwilioException?) {
+        Timber.d(twilioException, "onRoomDisconnected ")
+        localMediaManager.releaseLocalMediaTrack()
         contract.onRoomConnectStateChange(room, twilioException)
     }
 
     override fun onRoomConnectStateChange(room: Room, twilioException: TwilioException?) {
+        Timber.d(twilioException, "onRoomConnectStateChange")
         contract.onRoomConnectStateChange(room, twilioException)
     }
 
     override fun onParticipantConnected(room: Room, remoteParticipant: RemoteParticipant) {
+        Timber.d( "onParticipantConnected")
         participantManager.addParticipantAndSubscribe(remoteParticipant)
         participantCallback?.onParticipantNewConnected(remoteParticipant)
     }
 
     override fun onParticipantDisconnected(room: Room, remoteParticipant: RemoteParticipant) {
+        Timber.d( "onParticipantDisconnected")
         participantManager.removeParticipantAndSubscribe(remoteParticipant)
         contract.onParticipantDisconnected(room, remoteParticipant)
     }
 
     override fun onMessage(remoteDataTrack: RemoteDataTrack, message: String) {
+        Timber.d( "onMessage")
         contract.onCommunicationCommand(message)
     }
 
@@ -91,6 +97,7 @@ class TwilioManager(
         trackPublication: TrackPublication,
         twilioException: TwilioException
     ) {
+        Timber.d( twilioException,"onTrackSubscriptionFailed")
         contract.onTrackSubscriptionFailed(
             participant,
             trackPublication,
@@ -103,6 +110,7 @@ class TwilioManager(
         track: Track,
         twilioException: TwilioException
     ) {
+        Timber.d( twilioException,"onTrackPublicationFailed")
         contract.onTrackPublicationFailed(
             participant,
             track,
@@ -114,6 +122,7 @@ class TwilioManager(
         remoteParticipant: RemoteParticipant,
         remoteDataTrack: RemoteDataTrack
     ) {
+        Timber.d( "onDataTrackSubscribed")
         participantManager.addRemoteDataTrack(remoteParticipant, remoteDataTrack)
     }
 
@@ -121,14 +130,17 @@ class TwilioManager(
         remoteParticipant: RemoteParticipant,
         remoteVideoTrack: RemoteVideoTrack
     ) {
+        Timber.d( "onVideoTrackSubscribed")
         participantCallback?.onParticipantVideoTrackAvailable(remoteParticipant, remoteVideoTrack)
     }
 
     override fun onVideoTrackStateChange(remoteParticipant: RemoteParticipant, enable: Boolean) {
+        Timber.d( "onVideoTrackStateChange")
         participantCallback?.onParticipantVideoTrackStateChange(remoteParticipant, enable)
     }
 
     override fun onAudioTrackStateChange(remoteParticipant: RemoteParticipant, enable: Boolean) {
+        Timber.d( "onAudioTrackStateChange")
         participantCallback?.onParticipantAudioTrackStateChange(remoteParticipant, enable)
     }
 
@@ -136,6 +148,7 @@ class TwilioManager(
         remoteParticipant: RemoteParticipant,
         networkQualityLevel: NetworkQualityLevel
     ) {
+        Timber.d( "onNetworkQualityLevelChanged")
         contract.onNetworkQualityLevelChanged(remoteParticipant, networkQualityLevel)
     }
 }

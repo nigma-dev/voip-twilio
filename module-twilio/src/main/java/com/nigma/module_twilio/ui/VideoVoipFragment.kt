@@ -37,7 +37,7 @@ class VideoVoipFragment(binder: VoipServiceBinder) : VoipFragment(binder) {
         vv_primary.setZOrderOnTop(true)
         binder
             .localVideoTrack
-            ?.addRenderer(vv_primary)
+            ?.addRenderer(vv_secondary)
 
         fab_camera_handle
             .setOnClickListener {
@@ -64,6 +64,7 @@ class VideoVoipFragment(binder: VoipServiceBinder) : VoipFragment(binder) {
                 iv_btn_flip_cam.visibility = View.VISIBLE
             }
         }
+        include_profile.visibility = View.GONE
         track.addRenderer(vv_secondary)
     }
 

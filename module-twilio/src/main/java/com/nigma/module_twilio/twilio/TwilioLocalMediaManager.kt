@@ -9,9 +9,6 @@ class TwilioLocalMediaManager(
     private val twilioUseCase: TwilioUseCase
 ) {
 
-    val localParticipant
-        get() = twilioUseCase.localParticipant
-
     val localVideoTrack: LocalVideoTrack?
         get() = twilioUseCase.localVideoTrack
 
