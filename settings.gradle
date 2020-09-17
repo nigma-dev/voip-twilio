@@ -1,3 +1,4 @@
+include ':lib-call-media'
 include ':module-voip-ui'
 include ':lib-audio-router'
 include ':module-twilio'
